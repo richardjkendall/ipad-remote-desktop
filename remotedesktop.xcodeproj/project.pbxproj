@@ -15,6 +15,9 @@
 		6C5255CC2B63AFF20096F899 /* remotedesktopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255CB2B63AFF20096F899 /* remotedesktopTests.swift */; };
 		6C5255D62B63AFF20096F899 /* remotedesktopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255D52B63AFF20096F899 /* remotedesktopUITests.swift */; };
 		6C5255D82B63AFF20096F899 /* remotedesktopUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255D72B63AFF20096F899 /* remotedesktopUITestsLaunchTests.swift */; };
+		6C5255E52B64967A0096F899 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255E42B6496790096F899 /* Config.swift */; };
+		6C5255E72B6499A60096F899 /* ConfigModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255E62B6499A60096F899 /* ConfigModel.swift */; };
+		6C5255E92B6641B20096F899 /* viewer.html in Resources */ = {isa = PBXBuildFile; fileRef = 6C5255E82B6641B20096F899 /* viewer.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +49,9 @@
 		6C5255D12B63AFF20096F899 /* remotedesktopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = remotedesktopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C5255D52B63AFF20096F899 /* remotedesktopUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remotedesktopUITests.swift; sourceTree = "<group>"; };
 		6C5255D72B63AFF20096F899 /* remotedesktopUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remotedesktopUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		6C5255E42B6496790096F899 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		6C5255E62B6499A60096F899 /* ConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigModel.swift; sourceTree = "<group>"; };
+		6C5255E82B6641B20096F899 /* viewer.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = viewer.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +107,9 @@
 				6C5255BC2B63AFF10096F899 /* Item.swift */,
 				6C5255BE2B63AFF20096F899 /* Assets.xcassets */,
 				6C5255C02B63AFF20096F899 /* Preview Content */,
+				6C5255E42B6496790096F899 /* Config.swift */,
+				6C5255E62B6499A60096F899 /* ConfigModel.swift */,
+				6C5255E82B6641B20096F899 /* viewer.html */,
 			);
 			path = remotedesktop;
 			sourceTree = "<group>";
@@ -234,6 +243,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C5255E92B6641B20096F899 /* viewer.html in Resources */,
 				6C5255C22B63AFF20096F899 /* Preview Assets.xcassets in Resources */,
 				6C5255BF2B63AFF20096F899 /* Assets.xcassets in Resources */,
 			);
@@ -261,8 +271,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				6C5255BB2B63AFF10096F899 /* ContentView.swift in Sources */,
+				6C5255E52B64967A0096F899 /* Config.swift in Sources */,
 				6C5255BD2B63AFF10096F899 /* Item.swift in Sources */,
 				6C5255B92B63AFF10096F899 /* remotedesktopApp.swift in Sources */,
+				6C5255E72B6499A60096F899 /* ConfigModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

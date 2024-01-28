@@ -7,30 +7,75 @@
 
 import SwiftUI
 import SwiftData
+import WebKit
+
+struct GuacViewer: UIViewRepresentable {
+    let webView: WKWebView
+    let hostName: String
+    
+    init(host: String) {
+        print("Loading webview for \(host)")
+        
+        hostName = host
+        
+        let webConfig = WKWebViewConfiguration()
+        let userContentController = WKUserContentController()
+        
+        let userScript = """
+        var app_host_name = "\(hostName)";
+        """
+        let wkUserScript = WKUserScript(source: userScript, injectionTime: WKUserScriptInjectionTime.atDocumentStart, forMainFrameOnly: false)
+        userContentController.addUserScript(wkUserScript)
+        webConfig.userContentController = userContentController
+        
+        webView = WKWebView(frame: .zero, configuration: webConfig)
+    }
+    
+    func makeUIView(context: Context) -> WKWebView {
+        webView.allowsBackForwardNavigationGestures = false
+        return webView
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        if let url = Bundle.main.url(forResource: "viewer", withExtension: "html") {
+            print("inside updateUIView for \(hostName)")
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        } else {
+            print("HTML file not found")
+        }
+    }
+    
+    
+    
+}
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @StateObject var configModel = ConfigModel()
 
     var body: some View {
         NavigationSplitView {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                if let config = configModel.config {
+                    ForEach(config.availableHosts) { item in
+                        NavigationLink {
+                            GuacViewer(host: item.hostName)
+                                .onAppear {
+                                    print("on appear for \(item.hostName)")
+                                }
+                                .id(item.hostName + item.host + item.port)
+                        } label: {
+                            Text("Host \(item.hostName)")
+                        }
                     }
                 }
-                .onDelete(perform: deleteItems)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button(action: refreshHosts) {
+                        Label("Refresh Host List", systemImage: "arrow.clockwise.circle")
                     }
                 }
             }
@@ -39,20 +84,12 @@ struct ContentView: View {
         }
     }
 
-    private func addItem() {
+    private func refreshHosts() {
         withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+            configModel.refresh()
         }
     }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
+    
 }
 
 #Preview {

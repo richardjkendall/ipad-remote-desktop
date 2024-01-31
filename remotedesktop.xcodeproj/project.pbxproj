@@ -18,6 +18,8 @@
 		6C5255E52B64967A0096F899 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255E42B6496790096F899 /* Config.swift */; };
 		6C5255E72B6499A60096F899 /* ConfigModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255E62B6499A60096F899 /* ConfigModel.swift */; };
 		6C5255E92B6641B20096F899 /* viewer.html in Resources */ = {isa = PBXBuildFile; fileRef = 6C5255E82B6641B20096F899 /* viewer.html */; };
+		6C5255EC2B67913B0096F899 /* all.js in Resources */ = {isa = PBXBuildFile; fileRef = 6C5255EA2B67913B0096F899 /* all.js */; };
+		6C5255ED2B67913B0096F899 /* all.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 6C5255EB2B67913B0096F899 /* all.min.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +54,8 @@
 		6C5255E42B6496790096F899 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		6C5255E62B6499A60096F899 /* ConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigModel.swift; sourceTree = "<group>"; };
 		6C5255E82B6641B20096F899 /* viewer.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = viewer.html; sourceTree = "<group>"; };
+		6C5255EA2B67913B0096F899 /* all.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = all.js; sourceTree = "<group>"; };
+		6C5255EB2B67913B0096F899 /* all.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = all.min.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +106,8 @@
 		6C5255B72B63AFF10096F899 /* remotedesktop */ = {
 			isa = PBXGroup;
 			children = (
+				6C5255EA2B67913B0096F899 /* all.js */,
+				6C5255EB2B67913B0096F899 /* all.min.js */,
 				6C5255B82B63AFF10096F899 /* remotedesktopApp.swift */,
 				6C5255BA2B63AFF10096F899 /* ContentView.swift */,
 				6C5255BC2B63AFF10096F899 /* Item.swift */,
@@ -245,7 +251,9 @@
 			files = (
 				6C5255E92B6641B20096F899 /* viewer.html in Resources */,
 				6C5255C22B63AFF20096F899 /* Preview Assets.xcassets in Resources */,
+				6C5255EC2B67913B0096F899 /* all.js in Resources */,
 				6C5255BF2B63AFF20096F899 /* Assets.xcassets in Resources */,
+				6C5255ED2B67913B0096F899 /* all.min.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,15 +1,169 @@
 <!doctype html>
 <html>
     <head>
-        <title>Test</title>
+        <title>Desktop Viewer</title>
+        <style>
+            body {
+                padding: 0px;
+                margin: 0px;
+            }
+            
+            #display {
+                /*border: solid 1px black;*/
+                width: 100vw;
+                height: 100vh;
+                box-sizing: border-box;
+            }
+        </style>
+        <script type="text/javascript" src="all.js"></script>
         <script>
-        function showHostName() {
-            document.getElementById("hostName").innerHTML = app_host_name;
-        }
+            //let app_host_name = "win10-jump";
+            
+            let global_remote_disp_w = 0;
+            let global_remote_disp_h = 0;
+            let global_scale_factor = 1;
+            
+            let global_lcl_disp_w = 0;
+            let global_lcl_disp_h = 0;
+            
+            let guac = {};
+            
+            //window.webkit.messageHandlers.console.postMessage("starting for = " + app_host_name);
+            
+            const RemoteResize = (w, h) => {
+                console.log("remote resize w", w, "h", h);
+                global_remote_disp_w = w;
+                global_remote_disp_h = h;
+                SetScale();
+            };
+            
+            const resizeObserver = new ResizeObserver((entries) => {
+                const { width, height } = entries[0].contentRect;
+                console.log("width", width, "height", height);
+                global_lcl_disp_w = width;
+                global_lcl_disp_h = height;
+                SetScale();
+            });
+            
+            const SetScale = () => {
+                let factor = 1;
+                if(global_remote_disp_w > 0) {
+                    // case where it fits without scaling
+                    if(global_lcl_disp_w >= global_remote_disp_w && global_lcl_disp_h >= global_remote_disp_h) {
+                        console.log("no scaling needed");
+                        factor = 1;
+                    } else {
+                        factor = Math.min(global_lcl_disp_w / global_remote_disp_w, global_lcl_disp_h / global_remote_disp_h);
+                        console.log("need to scale, factor", factor);
+                    }
+                }
+                if(factor != global_scale_factor) {
+                    global_scale_factor = factor;
+                    if(guac) {
+                        console.log("setting scale", factor);
+                        guac.getDisplay().scale(factor);
+                    }
+                }
+            };
+            
+            function setup() {
+                const displayElem = document.querySelector("#display");
+                resizeObserver.observe(displayElem);
+                
+                conn();
+            }
+            
+            function conn() {
+                //window.webkit.messageHandlers.console.postMessage("connection for = " + app_host_name);
+                //document.getElementById("hostname").innerHTML = app_host_name;
+                
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": before getting display");
+                // Get display div from document
+                var display = document.getElementById("display");
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": got display");
+                
+                // Instantiate client, using an HTTP tunnel for communications.
+                guac = new Guacamole.Client(
+                    new Guacamole.WebSocketTunnel("ws://localhost:8080/workstation-0.0.1/websocket-tunnel/" + app_host_name)
+                );
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": created client");
+                
+                // Add client to display div
+                display.appendChild(guac.getDisplay().getElement());
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": added to document element");
+                
+                // listen for remote resize
+                guac.getDisplay().onresize = RemoteResize;
+                
+                // Error handler
+                guac.onerror = function(error) {
+                    //window.webkit.messageHandlers.console.postMessage(error);
+                    console.log(error);
+                };
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": added error function");
+                
+                // Connect
+                guac.connect();
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": connected");
+                
+                // setup mouse
+                var mouse = new Guacamole.Mouse(guac.getDisplay().getElement());
+                mouse.onmousedown =
+                mouse.onmouseup   =
+                mouse.onmousemove = (ms) => {
+                    const scale = guac.getDisplay().getScale();
+                    const scaledState = new Guacamole.Mouse.State(
+                                                                  ms.x / scale,
+                                                                  ms.y / scale,
+                                                                  ms.left,
+                                                                  ms.middle,
+                                                                  ms.right,
+                                                                  ms.up,
+                                                                  ms.down
+                                                                  );
+                    guac.sendMouseState(scaledState);
+                }
+                
+                // setup touchscreen
+                var touch = new Guacamole.Mouse.Touchscreen(guac.getDisplay().getElement());
+                touch.onmousedown =
+                touch.onmouseup   =
+                touch.onmousemove = (ms) => {
+                    const scale = guac.getDisplay().getScale();
+                    const scaledState = new Guacamole.Mouse.State(
+                                                                  ms.x / scale,
+                                                                  ms.y / scale,
+                                                                  ms.left,
+                                                                  ms.middle,
+                                                                  ms.right,
+                                                                  ms.up,
+                                                                  ms.down
+                                                                  );
+                    guac.sendMouseState(scaledState);
+                }
+                
+                // keyboard
+                var keyboard = new Guacamole.Keyboard(document);
+                keyboard.onkeydown = (ks) => {
+                    guac.sendKeyEvent(1, ks);
+                };
+                keyboard.onkeyup = (ks) => {
+                    guac.sendKeyEvent(0, ks);
+                };
+                
+                // Disconnect on close
+                window.onunload = function() {
+                    guac.disconnect();
+                }
+                //window.webkit.messageHandlers.console.postMessage(app_host_name + ": added unload");
+                
+                //window.webkit.messageHandlers.console.postMessage("ending for = " + app_host_name);
+                
+            }
         </script>
     </head>
-    <body onload="showHostName()">
-        <h1>Test</h1>
-        <p id="hostName"></p>
+    <body onload="setup();">
+            <!--<button onclick="conn();">connect</button>-->
+            <div id="display"></div>
     </body>
 </html>

@@ -84,7 +84,7 @@
                 
                 // Instantiate client, using an HTTP tunnel for communications.
                 guac = new Guacamole.Client(
-                    new Guacamole.WebSocketTunnel("ws://localhost:8080/workstation-0.0.1/websocket-tunnel/" + app_host_name)
+                    new Guacamole.WebSocketTunnel("wss://" + app_server_name + "/workstation-0.0.1/websocket-tunnel/" + app_host_name)
                 );
                 //window.webkit.messageHandlers.console.postMessage(app_host_name + ": created client");
                 

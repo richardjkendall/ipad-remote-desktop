@@ -13,20 +13,39 @@ class ConfigModel: ObservableObject {
     let logger = Logger()
     
     @Published private(set) var config: Config?
-    @Published var gotConfig: Bool
+    @Published var gotConfig = false
+    @Published var needLogin = false
     
     var authToken = HTTPCookie()
-    var serverHostName = ""
+    @Published var serverHostName = ""
     
     let AUTH_COOKIE_NAME = "mod_auth_openidc_session"
     
-    init(server: String) {
+    init() {
+        /*self.gotConfig = false
         self.serverHostName = server
-        self.gotConfig = false
-        
+         
         // need to get the auth token which is saved in the keychain if there is one
         let gotCookie = GetAuthCookie()
+        if gotCookie {
+        // we should try to load the data as we have a cookie
+            refresh()
+        }*/
         
+    }
+    
+    func setServer(server: String) {
+        print("setting server to \(server)")
+        self.serverHostName = server
+    }
+    
+    func initialLoad() {
+        // need to get the auth token which is saved in the keychain if there is one
+        let gotCookie = GetAuthCookie()
+        if gotCookie {
+            // we should try to load the data as we have a cookie
+            refresh()
+        }
     }
     
     func refresh() {
@@ -40,15 +59,14 @@ class ConfigModel: ObservableObject {
         do {
             print("trying to get token")
             let authTokenFromKeychain = try KeychainHelper.shared.getToken(identifier: "cookie-token")
-            print("got token")
-            print("token value \(authTokenFromKeychain.utf8)")
-            /*authToken = HTTPCookie(properties: [
+            print("got token, value \(authTokenFromKeychain)")
+            authToken = HTTPCookie(properties: [
                 .domain: "dummy.local",
                 .path: "/",
                 .name: AUTH_COOKIE_NAME,
-                .value: authTokenFromKeychain.utf8
-            ])!*/
-            print("got saved auth token from keychain")
+                .value: authTokenFromKeychain
+            ])!
+            print("created the httpcookie from the saved token")
             return true
         } catch {
             print("no saved auth token in keychain")
@@ -70,14 +88,23 @@ class ConfigModel: ObservableObject {
     
     func fetchData() async {
         do {
+            print("fetch data running for host \(serverHostName)")
             guard let url = URL(string: "https://\(serverHostName)/workstation-0.0.1/clientconfig") else { fatalError("Missing URL") }
+            
+            let urlSessionDelegate = SessionDelegate()
+            let urlSession = URLSession(configuration: .default, delegate: urlSessionDelegate, delegateQueue: nil)
             
             var urlRequest = URLRequest(url: url)
             urlRequest.setValue("\(AUTH_COOKIE_NAME)=\(authToken.value)", forHTTPHeaderField: "Cookie")
             
-            let (data, response) = try await URLSession.shared.data(for: urlRequest)
+            let (data, response) = try await urlSession.data(for: urlRequest)
             
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Error while fetching data") }
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+                print("did not get a 200 back from API")
+                self.gotConfig = false
+                self.needLogin = true
+                return
+            }
             
             let decoder = JSONDecoder()
             let decodedData = try decoder.decode(Config.self, from: data)
@@ -91,6 +118,13 @@ class ConfigModel: ObservableObject {
             
         } catch {
             print("Error getting data \(error)")
+        }
+    }
+    
+    class SessionDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
+        func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+            // Stops the redirection, and returns (internally) the response body.
+            completionHandler(nil)
         }
     }
 }

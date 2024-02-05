@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6C4716492B6DF1450083A4BB /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4716482B6DF1450083A4BB /* KeychainHelper.swift */; };
+		6C47164D2B7069CC0083A4BB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C47164C2B7069CC0083A4BB /* SettingsView.swift */; };
 		6C5255B92B63AFF10096F899 /* remotedesktopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255B82B63AFF10096F899 /* remotedesktopApp.swift */; };
 		6C5255BB2B63AFF10096F899 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255BA2B63AFF10096F899 /* ContentView.swift */; };
 		6C5255BD2B63AFF10096F899 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5255BC2B63AFF10096F899 /* Item.swift */; };
@@ -42,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		6C4716482B6DF1450083A4BB /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		6C47164C2B7069CC0083A4BB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6C5255B52B63AFF10096F899 /* remotedesktop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = remotedesktop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C5255B82B63AFF10096F899 /* remotedesktopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remotedesktopApp.swift; sourceTree = "<group>"; };
 		6C5255BA2B63AFF10096F899 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				6C5255E62B6499A60096F899 /* ConfigModel.swift */,
 				6C5255E82B6641B20096F899 /* viewer.html */,
 				6C4716482B6DF1450083A4BB /* KeychainHelper.swift */,
+				6C47164C2B7069CC0083A4BB /* SettingsView.swift */,
 			);
 			path = remotedesktop;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C47164D2B7069CC0083A4BB /* SettingsView.swift in Sources */,
 				6C5255BB2B63AFF10096F899 /* ContentView.swift in Sources */,
 				6C4716492B6DF1450083A4BB /* KeychainHelper.swift in Sources */,
 				6C5255E52B64967A0096F899 /* Config.swift in Sources */,

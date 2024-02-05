@@ -158,10 +158,11 @@ struct LoginView: View {
     let message: String
     
     let configObject: ConfigModel
+    let serverName: String
     
     var body: some View {
         VStack {
-            LoginWebView(server: "ra.bhop.local", callback: gotAuthToken)
+            LoginWebView(server: serverName, callback: gotAuthToken)
         }
         .padding()
         .interactiveDismissDisabled()
@@ -175,22 +176,16 @@ struct LoginView: View {
 }
 
 struct ContentView: View {
-    @StateObject var configModel = ConfigModel(server: "ra.bhop.local")
+    @StateObject var configModel = ConfigModel()
     @State private var showLoginPopup = false
-    //@State private var authToken = HTTPCookie()
+    @State private var showSettingsPopup = false
+    @State private var remoteServerHostName = ""
 
     init() {
         print("init for main view")
-        
-        // this hard codes the remote address until we are ready to do something else
-        let defaults = UserDefaults.standard
-        defaults.set("ra.bhop.local", forKey: "server_address")
+        //let defaults = UserDefaults.standard
+        //defaults.setValue("", forKeyPath: "server_address")
     }
-    
-    /*func gotAuthToken(token: HTTPCookie) {
-        print("in ContentView - gotAuthToken")
-        authToken = token
-    }*/
     
     var body: some View {
         NavigationSplitView {
@@ -198,7 +193,7 @@ struct ContentView: View {
                 if let config = configModel.config {
                     ForEach(config.availableHosts) { item in
                         NavigationLink {
-                            GuacViewer(host: item.hostName, server: "ra.bhop.local", config: configModel)
+                            GuacViewer(host: item.hostName, server: remoteServerHostName, config: configModel)
                                 .onAppear {
                                     print("on appear for \(item.hostName)")
                                 }
@@ -215,19 +210,65 @@ struct ContentView: View {
                         Label("Refresh Host List", systemImage: "arrow.clockwise.circle")
                     }
                 }
+                ToolbarItem {
+                    Button("Settings") {
+                        showSettingsPopup.toggle()
+                    }
+                }
             }
         } detail: {
-            Text("Select an item")
+            Text("Select a host to connect")
         }
         .sheet(isPresented: $showLoginPopup, onDismiss: {
             print("login popup has been dismissed")
         }) {
-            LoginView(message: "This is a modal view", configObject: configModel)
+            LoginView(message: "This is a modal view", configObject: configModel, serverName: remoteServerHostName)
+        }
+        .sheet(isPresented: $showSettingsPopup, onDismiss: {
+            print("settings popup has been dismissed")
+            print("new server value \(remoteServerHostName)")
+            if remoteServerHostName.isEmpty {
+                print("new server name empty")
+                showSettingsPopup = true
+            } else {
+                if remoteServerHostName != configModel.serverHostName {
+                    print("server name has changed")
+                    let defaults = UserDefaults.standard
+                    defaults.setValue(remoteServerHostName, forKeyPath: "server_address")
+                    configModel.setServer(server: remoteServerHostName)
+                }
+            }
+        }) {
+            SettingsView(remoteServerHostName: $remoteServerHostName)
         }
         .onChange(of: configModel.gotConfig) {
             print("gotConfig bool has changed to \(configModel.gotConfig)")
             if configModel.gotConfig {
                 showLoginPopup = false
+            }
+        }
+        .onChange(of: configModel.needLogin) {
+            if configModel.needLogin {
+                showLoginPopup = true
+            }
+        }
+        .onChange(of: configModel.serverHostName) {
+            print("doing init load")
+            configModel.initialLoad()
+        }
+        .onAppear() {
+            print("appeared")
+            let defaults = UserDefaults.standard
+            if let serverHostNameFromDefaults = defaults.string(forKey: "server_address") {
+                print("got server name from user defaults \(serverHostNameFromDefaults)")
+                if serverHostNameFromDefaults == "" {
+                    showSettingsPopup = true
+                } else {
+                    remoteServerHostName = serverHostNameFromDefaults
+                    configModel.setServer(server: serverHostNameFromDefaults)
+                }
+            } else {
+                showSettingsPopup = true
             }
         }
     }
@@ -242,5 +283,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        //.modelContainer(for: Item.self, inMemory: true)
 }

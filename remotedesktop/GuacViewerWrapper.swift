@@ -22,5 +22,6 @@ struct GuacViewerWrapper: View {
                 Logger.guacViewerWrapper.info("Onappear for guac view wrapper")
             }
         }
+        .ignoresSafeArea()
     }
 }

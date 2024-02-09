@@ -16,9 +16,7 @@ struct GuacViewer: UIViewRepresentable {
     let serverName: String
     let configObject: ConfigModel
     let messageHandler = MessageHandler()
-    
-    @State var firstShow = 0
-    
+        
     init(host: String, server: String, config: ConfigModel) {
         Logger.guacViewer.info("Loading webview for remote host \(host)")
         
@@ -56,17 +54,12 @@ struct GuacViewer: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        if firstShow == 0 {
-            Logger.guacViewer.info("First appearance for host \(hostName)")
-            if let url = Bundle.main.url(forResource: "viewer", withExtension: "html") {
-                Logger.guacViewer.info("Loading HTML file \(url)")
-                webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
-                firstShow = 1
-            } else {
-                Logger.guacViewer.warning("HTML file not found")
-            }
+        Logger.guacViewer.info("First appearance for host \(hostName)")
+        if let url = Bundle.main.url(forResource: "viewer", withExtension: "html") {
+            Logger.guacViewer.info("Loading HTML file \(url)")
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
-            Logger.guacViewer.info("Not first appearance for \(hostName)")
+            Logger.guacViewer.warning("HTML file not found")
         }
     }
     

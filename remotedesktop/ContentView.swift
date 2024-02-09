@@ -48,7 +48,12 @@ struct ContentView: View {
                 }
             }
         } detail: {
-            Text("Select a host to connect")
+            VStack {
+                Image("cws_logo")
+                    .resizable()
+                    .frame(width: 256, height: 256)
+                Text("Select a host to connect")
+            }
         }
         .sheet(isPresented: $showLoginPopup, onDismiss: {
             Logger.mainView.info("Login sheet has been dismissed")

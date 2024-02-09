@@ -9,15 +9,16 @@
             }
             
             #display {
-                /*border: solid 1px black;*/
                 width: 100vw;
                 height: 100vh;
                 box-sizing: border-box;
             }
         </style>
-        <script type="text/javascript" src="all.js"></script>
+        <script type="text/javascript" src="all.min.js"></script>
         <script>
-            //let app_host_name = "win10-jump";
+            function log_to_app(msg) {
+                window.webkit.messageHandlers.console.postMessage(msg);
+            }
             
             let global_remote_disp_w = 0;
             let global_remote_disp_h = 0;
@@ -84,7 +85,7 @@
                 
                 // Instantiate client, using an HTTP tunnel for communications.
                 guac = new Guacamole.Client(
-                    new Guacamole.WebSocketTunnel("wss://" + app_server_name + "/workstation-0.0.1/websocket-tunnel/" + app_host_name)
+                    new Guacamole.WebSocketTunnel("wss://" + app_server_name + "/" + app_path + "/websocket-tunnel/" + app_host_name)
                 );
                 //window.webkit.messageHandlers.console.postMessage(app_host_name + ": created client");
                 
@@ -94,6 +95,11 @@
                 
                 // listen for remote resize
                 guac.getDisplay().onresize = RemoteResize;
+                
+                // state change handler
+                guac.onstatechange = (state) => {
+                    log_to_app("connection state change: " + state);
+                };
                 
                 // Error handler
                 guac.onerror = function(error) {

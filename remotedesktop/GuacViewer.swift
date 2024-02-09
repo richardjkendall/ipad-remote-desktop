@@ -8,18 +8,19 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import OSLog
 
 struct GuacViewer: UIViewRepresentable {
     let webView: WKWebView
     let hostName: String
     let serverName: String
-    
     let configObject: ConfigModel
-    
     let messageHandler = MessageHandler()
     
+    @State var firstShow = 0
+    
     init(host: String, server: String, config: ConfigModel) {
-        print("Loading webview for \(host)")
+        Logger.guacViewer.info("Loading webview for remote host \(host)")
         
         hostName = host
         serverName = server
@@ -31,6 +32,7 @@ struct GuacViewer: UIViewRepresentable {
         let userScript = """
         var app_host_name = "\(hostName)";
         var app_server_name = "\(serverName)";
+        var app_path = "\(ConfigModel.APP_PATH)";
         """
         let wkUserScript = WKUserScript(source: userScript, injectionTime: WKUserScriptInjectionTime.atDocumentStart, forMainFrameOnly: false)
         userContentController.addUserScript(wkUserScript)
@@ -40,7 +42,7 @@ struct GuacViewer: UIViewRepresentable {
         let authCookie = HTTPCookie(properties: [
             .domain: serverName,
             .path: "/",
-            .name: "mod_auth_openidc_session",
+            .name: ConfigModel.AUTH_COOKIE_NAME,
             .value: configObject.authToken.value
         ])!
         webConfig.websiteDataStore.httpCookieStore.setCookie(authCookie)
@@ -54,19 +56,24 @@ struct GuacViewer: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        if let url = Bundle.main.url(forResource: "viewer", withExtension: "html") {
-            print("inside updateUIView for \(hostName)")
-            print("file \(url) path \(url.deletingLastPathComponent())")
-            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        if firstShow == 0 {
+            Logger.guacViewer.info("First appearance for host \(hostName)")
+            if let url = Bundle.main.url(forResource: "viewer", withExtension: "html") {
+                Logger.guacViewer.info("Loading HTML file \(url)")
+                webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+                firstShow = 1
+            } else {
+                Logger.guacViewer.warning("HTML file not found")
+            }
         } else {
-            print("HTML file not found")
+            Logger.guacViewer.info("Not first appearance for \(hostName)")
         }
     }
     
     class MessageHandler: NSObject, WKScriptMessageHandler {
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             if message.name == "console" {
-                print("js console: \(message.body)")
+                print("JS console: \(message.body)")
             }
         }
     }

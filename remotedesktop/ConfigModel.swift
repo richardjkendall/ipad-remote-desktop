@@ -10,32 +10,23 @@ import WebKit
 import OSLog
 
 class ConfigModel: ObservableObject {
-    let logger = Logger()
-    
     @Published private(set) var config: Config?
     @Published var gotConfig = false
     @Published var needLogin = false
+    @Published var gotError = false
     
     var authToken = HTTPCookie()
     @Published var serverHostName = ""
     
-    let AUTH_COOKIE_NAME = "mod_auth_openidc_session"
+    static let AUTH_COOKIE_NAME = "mod_auth_openidc_session"
+    static let APP_PATH = "workstation-0.0.1"
     
     init() {
-        /*self.gotConfig = false
-        self.serverHostName = server
-         
-        // need to get the auth token which is saved in the keychain if there is one
-        let gotCookie = GetAuthCookie()
-        if gotCookie {
-        // we should try to load the data as we have a cookie
-            refresh()
-        }*/
         
     }
     
     func setServer(server: String) {
-        print("setting server to \(server)")
+        Logger.configModel.info("Setting remote app server to \(server)")
         self.serverHostName = server
     }
     
@@ -49,7 +40,7 @@ class ConfigModel: ObservableObject {
     }
     
     func refresh() {
-        print("ConfigModel call to refresh")
+        Logger.configModel.info("ConfigModel call to refresh")
         Task.init {
             await fetchData()
         }
@@ -57,19 +48,19 @@ class ConfigModel: ObservableObject {
     
     private func GetAuthCookie() -> Bool {
         do {
-            print("trying to get token")
+            Logger.configModel.info("Trying to get token from keychain")
             let authTokenFromKeychain = try KeychainHelper.shared.getToken(identifier: "cookie-token")
-            print("got token, value \(authTokenFromKeychain)")
+            Logger.configModel.info("Got token from keychain")
             authToken = HTTPCookie(properties: [
                 .domain: "dummy.local",
                 .path: "/",
-                .name: AUTH_COOKIE_NAME,
+                .name: ConfigModel.AUTH_COOKIE_NAME,
                 .value: authTokenFromKeychain
             ])!
-            print("created the httpcookie from the saved token")
+            Logger.configModel.info("Created the httpcookie from the saved token")
             return true
         } catch {
-            print("no saved auth token in keychain")
+            Logger.configModel.info("No saved auth token in keychain")
             return false
         }
     }
@@ -78,31 +69,45 @@ class ConfigModel: ObservableObject {
         let authTokenVal = authToken.value
         do {
             try KeychainHelper.shared.upsertToken(Data(authTokenVal.utf8), identifier: "cookie-token")
-            print("Saved token in keychain")
-            logger.info("Saved token in keychain")
+            Logger.configModel.info("Saved token in keychain")
         } catch {
             print("Error saving token \(error)")
-            logger.error("Error saving token \(error)")
+            Logger.configModel.error("Error saving token \(error)")
         }
     }
     
     func fetchData() async {
         do {
-            print("fetch data running for host \(serverHostName)")
-            guard let url = URL(string: "https://\(serverHostName)/workstation-0.0.1/clientconfig") else { fatalError("Missing URL") }
+            Logger.configModel.info("Calling client config api data running for server \(self.serverHostName)")
+            guard let url = URL(string: "https://\(serverHostName)/\(ConfigModel.APP_PATH)/clientconfig") else { fatalError("Missing URL") }
             
             let urlSessionDelegate = SessionDelegate()
             let urlSession = URLSession(configuration: .default, delegate: urlSessionDelegate, delegateQueue: nil)
             
             var urlRequest = URLRequest(url: url)
-            urlRequest.setValue("\(AUTH_COOKIE_NAME)=\(authToken.value)", forHTTPHeaderField: "Cookie")
+            urlRequest.setValue("\(ConfigModel.AUTH_COOKIE_NAME)=\(authToken.value)", forHTTPHeaderField: "Cookie")
             
             let (data, response) = try await urlSession.data(for: urlRequest)
             
             guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-                print("did not get a 200 back from API")
-                self.gotConfig = false
-                self.needLogin = true
+                Logger.configModel.info("Clientconfig API did not respond with a 200")
+                
+                if (response as? HTTPURLResponse)?.statusCode == 302 {
+                    Logger.configModel.info("Got a 302 which means token has expired, so we need to login")
+                    
+                    DispatchQueue.main.async {
+                        self.gotConfig = false
+                        self.gotError = false
+                        self.needLogin = true
+                    }
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    self.gotConfig = false
+                    self.gotError = true
+                    self.needLogin = false
+                }
                 return
             }
             
@@ -114,10 +119,12 @@ class ConfigModel: ObservableObject {
             DispatchQueue.main.async {
                 self.config = decodedData
                 self.gotConfig = true
+                self.needLogin = false
+                self.gotError = false
             }
             
         } catch {
-            print("Error getting data \(error)")
+            Logger.configModel.error("Error getting data from clientconfig API \(error)")
         }
     }
     

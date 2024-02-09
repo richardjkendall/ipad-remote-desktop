@@ -25,6 +25,8 @@
 		6CDC1B902B717AD80026E43C /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B8F2B717AD80026E43C /* LoginWebView.swift */; };
 		6CDC1B922B7190D00026E43C /* GuacViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B912B7190D00026E43C /* GuacViewer.swift */; };
 		6CDC1B942B71911C0026E43C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B932B71911C0026E43C /* LoginView.swift */; };
+		6CDC1B962B71A5350026E43C /* GuacViewerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B952B71A5350026E43C /* GuacViewerWrapper.swift */; };
+		6CDC1B982B71B5240026E43C /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B972B71B5240026E43C /* Logger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +68,8 @@
 		6CDC1B8F2B717AD80026E43C /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		6CDC1B912B7190D00026E43C /* GuacViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuacViewer.swift; sourceTree = "<group>"; };
 		6CDC1B932B71911C0026E43C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		6CDC1B952B71A5350026E43C /* GuacViewerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuacViewerWrapper.swift; sourceTree = "<group>"; };
+		6CDC1B972B71B5240026E43C /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +135,8 @@
 				6CDC1B8F2B717AD80026E43C /* LoginWebView.swift */,
 				6CDC1B912B7190D00026E43C /* GuacViewer.swift */,
 				6CDC1B932B71911C0026E43C /* LoginView.swift */,
+				6CDC1B952B71A5350026E43C /* GuacViewerWrapper.swift */,
+				6CDC1B972B71B5240026E43C /* Logger.swift */,
 			);
 			path = remotedesktop;
 			sourceTree = "<group>";
@@ -298,7 +304,9 @@
 				6C4716492B6DF1450083A4BB /* KeychainHelper.swift in Sources */,
 				6C5255E52B64967A0096F899 /* Config.swift in Sources */,
 				6C5255BD2B63AFF10096F899 /* Item.swift in Sources */,
+				6CDC1B962B71A5350026E43C /* GuacViewerWrapper.swift in Sources */,
 				6C5255B92B63AFF10096F899 /* remotedesktopApp.swift in Sources */,
+				6CDC1B982B71B5240026E43C /* Logger.swift in Sources */,
 				6C5255E72B6499A60096F899 /* ConfigModel.swift in Sources */,
 				6CDC1B902B717AD80026E43C /* LoginWebView.swift in Sources */,
 				6CDC1B942B71911C0026E43C /* LoginView.swift in Sources */,

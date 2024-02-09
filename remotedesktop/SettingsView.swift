@@ -7,10 +7,13 @@
 
 import Foundation
 import SwiftUI
+import CFNetwork
+import OSLog
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Binding var remoteServerHostName: String
+    @State var hostError = false
     
     var body: some View {
         NavigationView {
@@ -29,11 +32,38 @@ struct SettingsView: View {
                 }
                 Button("Save") {
                     print("Settings save pressed")
-                    dismiss()
+                    Logger.settingsView.info("Saving settings")
+                    if checkHostName(host: remoteServerHostName) {
+                        Logger.settingsView.info("Server name has resolved")
+                        dismiss()
+                    } else {
+                        Logger.settingsView.info("Server name does not resolve")
+                        hostError = true
+                    }
                 }
                 .padding()
             }
         }
         .interactiveDismissDisabled()
+        .alert(isPresented: $hostError) {
+            Alert(
+                title: Text("DNS Error"),
+                message: Text("Could not resolve the host name provided")
+            )
+        }
+    }
+    
+    func checkHostName(host: String) -> Bool {
+        let host = CFHostCreateWithName(nil, host as CFString).takeRetainedValue()
+        CFHostStartInfoResolution(host, .addresses, nil)
+        var success: DarwinBoolean = false
+        if let addresses = CFHostGetAddressing(host, &success)?.takeUnretainedValue() as NSArray? {
+            Logger.settingsView.info("Got IP addresses for host name")
+            print("got IP addresses from DNS name")
+            return true
+        }
+        Logger.settingsView.info("Did not get IP addresses for host name")
+        print("did not get IP addresses from DNS name")
+        return false
     }
 }

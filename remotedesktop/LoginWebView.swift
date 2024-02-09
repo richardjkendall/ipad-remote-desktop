@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 import WebKit
-
+import OSLog
 
 struct LoginWebView: UIViewRepresentable {
     let webView: WKWebView
@@ -40,7 +40,7 @@ struct LoginWebView: UIViewRepresentable {
     }
     
     func authToken(token: HTTPCookie) {
-        print("got token back from nav handler of \(token.value)")
+        Logger.loginWebView.info("Got auth token back from NavHandler")
         tokenCallback(token)
     }
     
@@ -54,19 +54,19 @@ struct LoginWebView: UIViewRepresentable {
         
         func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
             if let url = webView.url {
-                print("redirect to url = \(url.absoluteString)")
+                Logger.loginWebView.info("NavHandler: redirect to URL = \(url.absoluteString)")
                 if url.host() == remoteDesktopServerHost {
                     if url.path() == "/workstation-0.0.1/clientconfig" {
                         // this is a redirect back to the clientconfig API, so login is done
                         // we need to get the auth cookie out
-                        print("redirect back to clientconfig API")
+                        Logger.loginWebView.info("NavHandler: redirecting back to clientconfig API")
                                                 
                         // get token if present
                         webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
                             for cookie in cookies {
-                                print("cookie: \(cookie.name) = \(cookie.value)")
+                                Logger.loginWebView.debug("NavHandler: got cookie \(cookie.name) = \(cookie.value)")
                                 if cookie.name == "mod_auth_openidc_session" {
-                                    print("callback auth cookie")
+                                    Logger.loginWebView.info("NavHandler: calling back for auth cookie")
                                     if self.authTokenCallback != nil {
                                         // we trigger the callback if we got the token we wanted
                                         self.authTokenCallback(cookie)
@@ -80,10 +80,8 @@ struct LoginWebView: UIViewRepresentable {
         }
         
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            print("nav to \(navigationAction.request.url?.absoluteString ?? "no url")")
-            
+            Logger.loginWebView.info("NavHandler: navigating to \(navigationAction.request.url?.absoluteString ?? "no url")")
             // we are not doing anything here yet
-
             decisionHandler(.allow)
         }
     }

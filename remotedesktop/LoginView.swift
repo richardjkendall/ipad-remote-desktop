@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import OSLog
 
 struct LoginView: View {
     @Environment(\.dismiss) var dismiss
@@ -25,7 +26,7 @@ struct LoginView: View {
     }
     
     func gotAuthToken(token: HTTPCookie) {
-        print("LoginView: in gotAuthToken")
+        Logger.loginView.info("gotAuthToken")
         configObject.authToken = token
         configObject.refresh()
     }

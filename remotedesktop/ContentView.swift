@@ -8,17 +8,17 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import OSLog
 
 struct ContentView: View {
     @StateObject var configModel = ConfigModel()
     @State private var showLoginPopup = false
     @State private var showSettingsPopup = false
     @State private var remoteServerHostName = ""
+    @State private var showErrorAlert = false
 
     init() {
-        print("init for main view")
-        //let defaults = UserDefaults.standard
-        //defaults.setValue("", forKeyPath: "server_address")
+        Logger.mainView.info("Init for view")
     }
     
     var body: some View {
@@ -27,10 +27,7 @@ struct ContentView: View {
                 if let config = configModel.config {
                     ForEach(config.availableHosts) { item in
                         NavigationLink {
-                            GuacViewer(host: item.hostName, server: remoteServerHostName, config: configModel)
-                                .onAppear {
-                                    print("on appear for \(item.hostName)")
-                                }
+                            GuacViewerWrapper(host: item.hostName, server: remoteServerHostName, config: configModel)
                                 .id(item.hostName + item.host + item.port)
                         } label: {
                             Text("Host \(item.hostName)")
@@ -45,8 +42,8 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem {
-                    Button("Settings") {
-                        showSettingsPopup.toggle()
+                    Button(action: openSettings) {
+                        Label("Settings", systemImage: "gear")
                     }
                 }
             }
@@ -54,19 +51,18 @@ struct ContentView: View {
             Text("Select a host to connect")
         }
         .sheet(isPresented: $showLoginPopup, onDismiss: {
-            print("login popup has been dismissed")
+            Logger.mainView.info("Login sheet has been dismissed")
         }) {
             LoginView(message: "This is a modal view", configObject: configModel, serverName: remoteServerHostName)
         }
         .sheet(isPresented: $showSettingsPopup, onDismiss: {
-            print("settings popup has been dismissed")
-            print("new server value \(remoteServerHostName)")
+            Logger.mainView.info("Settings sheet has been dismissed")
             if remoteServerHostName.isEmpty {
-                print("new server name empty")
+                Logger.mainView.info("No server name provided on the settings sheet")
                 showSettingsPopup = true
             } else {
                 if remoteServerHostName != configModel.serverHostName {
-                    print("server name has changed")
+                    Logger.mainView.info("Server name has changed to \(remoteServerHostName)")
                     let defaults = UserDefaults.standard
                     defaults.setValue(remoteServerHostName, forKeyPath: "server_address")
                     configModel.setServer(server: remoteServerHostName)
@@ -75,26 +71,32 @@ struct ContentView: View {
         }) {
             SettingsView(remoteServerHostName: $remoteServerHostName)
         }
+        .alert(isPresented: $configModel.gotError) {
+            Alert(
+                title: Text("Error getting hosts"),
+                message: Text("Got non standard response from server")
+            )
+        }
         .onChange(of: configModel.gotConfig) {
-            print("gotConfig bool has changed to \(configModel.gotConfig)")
             if configModel.gotConfig {
+                Logger.mainView.info("We have config information")
                 showLoginPopup = false
             }
         }
         .onChange(of: configModel.needLogin) {
             if configModel.needLogin {
+                Logger.mainView.info("Need to show login sheet")
                 showLoginPopup = true
             }
         }
         .onChange(of: configModel.serverHostName) {
-            print("doing init load")
+            Logger.mainView.info("Performing config initial load")
             configModel.initialLoad()
         }
         .onAppear() {
-            print("appeared")
             let defaults = UserDefaults.standard
             if let serverHostNameFromDefaults = defaults.string(forKey: "server_address") {
-                print("got server name from user defaults \(serverHostNameFromDefaults)")
+                Logger.mainView.info("Got server name from user defaults \(serverHostNameFromDefaults)")
                 if serverHostNameFromDefaults == "" {
                     showSettingsPopup = true
                 } else {
@@ -105,6 +107,10 @@ struct ContentView: View {
                 showSettingsPopup = true
             }
         }
+    }
+    
+    private func openSettings() {
+        showSettingsPopup.toggle()
     }
 
     private func refreshHosts() {

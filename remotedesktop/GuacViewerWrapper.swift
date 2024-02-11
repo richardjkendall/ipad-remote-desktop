@@ -14,14 +14,25 @@ struct GuacViewerWrapper: View {
     var server: String
     var config: ConfigModel
     
+    @State var showLoadingBox = false
+    
     var body: some View {
-        VStack {
-            GuacViewer(host: host, server: server, config: config)
+        ZStack {
+            GuacViewer(host: host, server: server, config: config, closeProgressBoxCallback: CloseProgressView)
             .onAppear {
                 print("wrapper onappear")
                 Logger.guacViewerWrapper.info("Onappear for guac view wrapper")
             }
+            if showLoadingBox {
+                ProgressAlert(closeAction: {
+                    print("close")
+                })
+            }
         }
-        .ignoresSafeArea()
+    }
+    
+    func CloseProgressView() {
+        print("in close progress view")
+        showLoadingBox = false
     }
 }

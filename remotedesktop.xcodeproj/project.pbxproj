@@ -27,6 +27,7 @@
 		6CDC1B942B71911C0026E43C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B932B71911C0026E43C /* LoginView.swift */; };
 		6CDC1B962B71A5350026E43C /* GuacViewerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B952B71A5350026E43C /* GuacViewerWrapper.swift */; };
 		6CDC1B982B71B5240026E43C /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B972B71B5240026E43C /* Logger.swift */; };
+		6CDC1B9A2B7779A20026E43C /* ProgressAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDC1B992B7779A20026E43C /* ProgressAlert.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		6CDC1B932B71911C0026E43C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		6CDC1B952B71A5350026E43C /* GuacViewerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuacViewerWrapper.swift; sourceTree = "<group>"; };
 		6CDC1B972B71B5240026E43C /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		6CDC1B992B7779A20026E43C /* ProgressAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressAlert.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +139,7 @@
 				6CDC1B932B71911C0026E43C /* LoginView.swift */,
 				6CDC1B952B71A5350026E43C /* GuacViewerWrapper.swift */,
 				6CDC1B972B71B5240026E43C /* Logger.swift */,
+				6CDC1B992B7779A20026E43C /* ProgressAlert.swift */,
 			);
 			path = remotedesktop;
 			sourceTree = "<group>";
@@ -305,6 +308,7 @@
 				6C5255E52B64967A0096F899 /* Config.swift in Sources */,
 				6C5255BD2B63AFF10096F899 /* Item.swift in Sources */,
 				6CDC1B962B71A5350026E43C /* GuacViewerWrapper.swift in Sources */,
+				6CDC1B9A2B7779A20026E43C /* ProgressAlert.swift in Sources */,
 				6C5255B92B63AFF10096F899 /* remotedesktopApp.swift in Sources */,
 				6CDC1B982B71B5240026E43C /* Logger.swift in Sources */,
 				6C5255E72B6499A60096F899 /* ConfigModel.swift in Sources */,

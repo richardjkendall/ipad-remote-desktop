@@ -29,19 +29,23 @@ struct SettingsView: View {
                             Text("Server host name")
                         }
                     }
-                }
-                Button("Save") {
-                    print("Settings save pressed")
-                    Logger.settingsView.info("Saving settings")
-                    if checkHostName(host: remoteServerHostName) {
-                        Logger.settingsView.info("Server name has resolved")
-                        dismiss()
-                    } else {
-                        Logger.settingsView.info("Server name does not resolve")
-                        hostError = true
+                    Button("Save") {
+                        print("Settings save pressed")
+                        Logger.settingsView.info("Saving settings")
+                        if checkHostName(host: remoteServerHostName) {
+                            Logger.settingsView.info("Server name has resolved")
+                            dismiss()
+                        } else {
+                            Logger.settingsView.info("Server name does not resolve")
+                            hostError = true
+                        }
+                    }
+                    Button("Reset to defaults") {
+                        print("Reset settings")
                     }
                 }
-                .padding()
+                
+                
             }
         }
         .interactiveDismissDisabled()

@@ -98,7 +98,8 @@
                 
                 // state change handler
                 guac.onstatechange = (state) => {
-                    log_to_app("connection state change: " + state);
+                    //log_to_app("connection state change: " + state);
+                    window.webkit.messageHandlers.connState.postMessage("S" + state);
                 };
                 
                 // Error handler

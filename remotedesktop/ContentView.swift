@@ -19,6 +19,8 @@ struct ContentView: View {
 
     init() {
         Logger.mainView.info("Init for view")
+        //let defaults = UserDefaults.standard
+        //defaults.setValue("", forKeyPath: "server_address")
     }
     
     var body: some View {
@@ -57,16 +59,24 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showLoginPopup, onDismiss: {
             Logger.mainView.info("Login sheet has been dismissed")
+            print("login sheet dismissed")
+            if configModel.needNewServer {
+                print("we need a new server")
+                configModel.setServer(server: "")
+            }
         }) {
             LoginView(message: "This is a modal view", configObject: configModel, serverName: remoteServerHostName)
         }
         .sheet(isPresented: $showSettingsPopup, onDismiss: {
             Logger.mainView.info("Settings sheet has been dismissed")
+            print("settings closed")
             if remoteServerHostName.isEmpty {
                 Logger.mainView.info("No server name provided on the settings sheet")
                 showSettingsPopup = true
             } else {
+                print("got server name from settings of \(remoteServerHostName), current value is \(configModel.serverHostName)")
                 if remoteServerHostName != configModel.serverHostName {
+                    print("server name has changed")
                     Logger.mainView.info("Server name has changed to \(remoteServerHostName)")
                     let defaults = UserDefaults.standard
                     defaults.setValue(remoteServerHostName, forKeyPath: "server_address")
@@ -95,8 +105,18 @@ struct ContentView: View {
             }
         }
         .onChange(of: configModel.serverHostName) {
-            Logger.mainView.info("Performing config initial load")
-            configModel.initialLoad()
+            Logger.mainView.info("Server host name changed")
+            print("server host name is now = \(configModel.serverHostName)")
+            // if the host name is blank, we need a new server host name so show settings, otherwise we try a load
+            if configModel.serverHostName.isEmpty {
+                print("as server host name is empty, we should show the settings box")
+                remoteServerHostName = ""
+                showSettingsPopup = true
+            } else {
+                print("we have the server name, we need to load config data")
+                configModel.reset()
+                configModel.initialLoad()
+            }
         }
         .onAppear() {
             let defaults = UserDefaults.standard

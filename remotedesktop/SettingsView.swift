@@ -34,6 +34,7 @@ struct SettingsView: View {
                         Logger.settingsView.info("Saving settings")
                         if checkHostName(host: remoteServerHostName) {
                             Logger.settingsView.info("Server name has resolved")
+                            print("DNS lookup is okay")
                             dismiss()
                         } else {
                             Logger.settingsView.info("Server name does not resolve")
@@ -42,6 +43,10 @@ struct SettingsView: View {
                     }
                     Button("Reset to defaults") {
                         print("Reset settings")
+                    }
+                    Button("Close without changes") {
+                        Logger.settingsView.info("Closing form without changes")
+                        dismiss()
                     }
                 }
                 

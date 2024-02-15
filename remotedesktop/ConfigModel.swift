@@ -14,6 +14,7 @@ class ConfigModel: ObservableObject {
     @Published var gotConfig = false
     @Published var needLogin = false
     @Published var gotError = false
+    @Published var needNewServer = false
     
     var authToken = HTTPCookie()
     @Published var serverHostName = ""
@@ -27,7 +28,19 @@ class ConfigModel: ObservableObject {
     
     func setServer(server: String) {
         Logger.configModel.info("Setting remote app server to \(server)")
+        self.needNewServer = false
         self.serverHostName = server
+    }
+    
+    func setNewServerNeeded() {
+        self.needNewServer = true
+    }
+    
+    func reset() {
+        config = nil
+        gotConfig = false
+        needLogin = false
+        gotError = false
     }
     
     func initialLoad() {
@@ -36,6 +49,9 @@ class ConfigModel: ObservableObject {
         if gotCookie {
             // we should try to load the data as we have a cookie
             refresh()
+        } else {
+            // set need login so we can get
+            needLogin = true
         }
     }
     
@@ -49,7 +65,7 @@ class ConfigModel: ObservableObject {
     private func GetAuthCookie() -> Bool {
         do {
             Logger.configModel.info("Trying to get token from keychain")
-            let authTokenFromKeychain = try KeychainHelper.shared.getToken(identifier: "cookie-token")
+            let authTokenFromKeychain = try KeychainHelper.shared.getToken(identifier: "cookie-token_\(serverHostName)")
             Logger.configModel.info("Got token from keychain")
             authToken = HTTPCookie(properties: [
                 .domain: "dummy.local",
@@ -68,7 +84,7 @@ class ConfigModel: ObservableObject {
     private func SaveAuthCookie() {
         let authTokenVal = authToken.value
         do {
-            try KeychainHelper.shared.upsertToken(Data(authTokenVal.utf8), identifier: "cookie-token")
+            try KeychainHelper.shared.upsertToken(Data(authTokenVal.utf8), identifier: "cookie-token_\(serverHostName)")
             Logger.configModel.info("Saved token in keychain")
         } catch {
             print("Error saving token \(error)")

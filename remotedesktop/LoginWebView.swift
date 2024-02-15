@@ -11,15 +11,14 @@ import WebKit
 import OSLog
 
 struct LoginWebView: UIViewRepresentable {
-    let webView: WKWebView
-    let remoteDesktopServerHost: String
-    let navHandler: NavHandler
-    
+    var remoteDesktopServerHost: Binding<String>
+    var webView: WKWebView
+    var navHandler: NavHandler
     var tokenCallback: ((HTTPCookie) -> ())!
     
-    init(server: String, callback: @escaping (HTTPCookie) -> ()) {
+    init(server: Binding<String>, callback: @escaping (HTTPCookie) -> ()) {
         remoteDesktopServerHost = server
-        navHandler = NavHandler(server: server)
+        navHandler = NavHandler(server: server.wrappedValue)
         tokenCallback = callback
 
         let webConfig = WKWebViewConfiguration()
@@ -35,8 +34,12 @@ struct LoginWebView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        let url = URL(string: "https://\(remoteDesktopServerHost)/workstation-0.0.1/clientconfig")!
-        webView.load(URLRequest(url: url))
+        //print("in loginwebview updateUIView... server val \(remoteDesktopServerHost.wrappedValue)")
+        let url = URL(string: "https://\(remoteDesktopServerHost.wrappedValue)/\(ConfigModel.APP_PATH)/clientconfig")!
+        //print("new url is \(url)")
+        navHandler.updateServerName(remoteDesktopServerHost.wrappedValue)
+        uiView.navigationDelegate = navHandler
+        uiView.load(URLRequest(url: url))
     }
     
     func authToken(token: HTTPCookie) {
@@ -45,18 +48,25 @@ struct LoginWebView: UIViewRepresentable {
     }
     
     class NavHandler: NSObject, WKNavigationDelegate {
-        let remoteDesktopServerHost: String
+        var remoteDesktopServerHost: String
         var authTokenCallback: ((HTTPCookie) -> ())!
         
         init(server: String) {
             remoteDesktopServerHost = server
         }
         
+        func updateServerName(_ server: String) {
+            print("setting updated server value in nav handler to = \(server)")
+            remoteDesktopServerHost = server
+        }
+        
         func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
             if let url = webView.url {
                 Logger.loginWebView.info("NavHandler: redirect to URL = \(url.absoluteString)")
+                //print("NavHandler: redirect to URL = \(url.absoluteString)")
+                //print("looking for server = \(remoteDesktopServerHost)")
                 if url.host() == remoteDesktopServerHost {
-                    if url.path() == "/workstation-0.0.1/clientconfig" {
+                    if url.path() == "/\(ConfigModel.APP_PATH)/clientconfig" {
                         // this is a redirect back to the clientconfig API, so login is done
                         // we need to get the auth cookie out
                         Logger.loginWebView.info("NavHandler: redirecting back to clientconfig API")
@@ -65,10 +75,11 @@ struct LoginWebView: UIViewRepresentable {
                         webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
                             for cookie in cookies {
                                 Logger.loginWebView.debug("NavHandler: got cookie \(cookie.name) = \(cookie.value)")
-                                if cookie.name == "mod_auth_openidc_session" {
+                                if cookie.name == ConfigModel.AUTH_COOKIE_NAME {
                                     Logger.loginWebView.info("NavHandler: calling back for auth cookie")
                                     if self.authTokenCallback != nil {
                                         // we trigger the callback if we got the token we wanted
+                                        //print("sending auth token callback")
                                         self.authTokenCallback(cookie)
                                     }
                                 }

@@ -12,10 +12,12 @@ import OSLog
 
 struct ContentView: View {
     @StateObject var configModel = ConfigModel()
+    
     @State private var showLoginPopup = false
     @State private var showSettingsPopup = false
     @State private var remoteServerHostName = ""
     @State private var showErrorAlert = false
+    @State private var selectedHost: String? = ""
 
     init() {
         Logger.mainView.info("Init for view")
@@ -25,15 +27,10 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            List {
+            List(selection: $selectedHost) {
                 if let config = configModel.config {
-                    ForEach(config.availableHosts) { item in
-                        NavigationLink {
-                            GuacViewerWrapper(host: item.hostName, server: remoteServerHostName, config: configModel)
-                                .id(item.hostName + item.host + item.port)
-                        } label: {
-                            Text("Host \(item.hostName)")
-                        }
+                    ForEach(config.availableHosts, id: \.hostName) { item in
+                        Text("Host \(item.hostName)")
                     }
                 }
             }
@@ -48,20 +45,37 @@ struct ContentView: View {
                         Label("Settings", systemImage: "gear")
                     }
                 }
+                ToolbarItem {
+                    Button(action: closeHost) {
+                        Label("Close", systemImage: "xmark")
+                    }
+                    .disabled(selectedHost!.isEmpty)
+                }
             }
         } detail: {
-            VStack {
-                Image("cws_logo")
-                    .resizable()
-                    .frame(width: 256, height: 256)
-                Text("Select a host to connect")
+            if !selectedHost!.isEmpty {
+                // get host
+                if let item = try? configModel.getHostByName(h: selectedHost!) {
+                    GuacViewerWrapper(host: item.hostName, server: remoteServerHostName, config: configModel)
+                        .id(item.hostName + item.host + item.port)
+                } else {
+                    Text("Error")
+                }
+            } else {
+                VStack {
+                    Image("cws_logo")
+                        .resizable()
+                        .frame(width: 256, height: 256)
+                    Text("Select a host to connect")
+                }
             }
-        }
+        }        
         .sheet(isPresented: $showLoginPopup, onDismiss: {
             Logger.mainView.info("Login sheet has been dismissed")
-            print("login sheet dismissed")
+            //print("login sheet dismissed")
             if configModel.needNewServer {
-                print("we need a new server")
+                //print("we need a new server")
+                Logger.mainView.info("Login form has closed with a request for a new server...")
                 configModel.setServer(server: "")
             }
         }) {
@@ -69,7 +83,7 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettingsPopup, onDismiss: {
             Logger.mainView.info("Settings sheet has been dismissed")
-            print("settings closed")
+            //print("settings closed")
             if remoteServerHostName.isEmpty {
                 Logger.mainView.info("No server name provided on the settings sheet")
                 showSettingsPopup = true
@@ -105,11 +119,12 @@ struct ContentView: View {
             }
         }
         .onChange(of: configModel.serverHostName) {
-            Logger.mainView.info("Server host name changed")
+            Logger.mainView.info("Server host name changed has changed to \(configModel.serverHostName)")
             print("server host name is now = \(configModel.serverHostName)")
             // if the host name is blank, we need a new server host name so show settings, otherwise we try a load
             if configModel.serverHostName.isEmpty {
                 print("as server host name is empty, we should show the settings box")
+                Logger.mainView.info("Server host name is empty and we need one, so show the settings popup")
                 remoteServerHostName = ""
                 showSettingsPopup = true
             } else {
@@ -142,6 +157,10 @@ struct ContentView: View {
         withAnimation {
             configModel.refresh()
         }
+    }
+    
+    private func closeHost() {
+        selectedHost = ""
     }
     
 }

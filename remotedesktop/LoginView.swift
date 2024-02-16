@@ -25,30 +25,12 @@ struct LoginView: View {
             LoginWebView(server: $serverName, callback: gotAuthToken)
             Button("Use a different server") {
                 // blank server and close login screen
-                // configObject.setServer(server: "")
                 configObject.setNewServerNeeded()
                 dismiss()
             }
         }
         .padding()
         .interactiveDismissDisabled()
-        /*.sheet(isPresented: $showSettingsPopup, onDismiss: {
-            print("close settings from login view")
-            if newRemoteServerHostName.isEmpty {
-                showSettingsPopup = true
-            } else {
-                if newRemoteServerHostName != configObject.serverHostName {
-                    print("server name has changed")
-                    let defaults = UserDefaults.standard
-                    defaults.setValue(newRemoteServerHostName, forKeyPath: "server_address")
-                    configObject.setServer(server: newRemoteServerHostName)
-                    serverName = newRemoteServerHostName
-                    //dismiss()
-                }
-            }
-        }) {
-            SettingsView(remoteServerHostName: $newRemoteServerHostName)
-        }*/
         .onAppear() {
             newRemoteServerHostName = serverName
         }

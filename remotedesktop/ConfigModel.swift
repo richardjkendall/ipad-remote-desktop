@@ -10,6 +10,10 @@ import WebKit
 import OSLog
 
 class ConfigModel: ObservableObject {
+    enum ConfigModelError: LocalizedError {
+        case hostNotFound
+    }
+    
     @Published private(set) var config: Config?
     @Published var gotConfig = false
     @Published var needLogin = false
@@ -24,6 +28,18 @@ class ConfigModel: ObservableObject {
     
     init() {
         
+    }
+    
+    func getHostByName(h: String) throws -> Host? {
+        print("getting host details for \(h)")
+        if let c = config {
+            for host in c.availableHosts {
+                if host.hostName == h {
+                    return host
+                }
+            }
+        }
+        throw ConfigModelError.hostNotFound
     }
     
     func setServer(server: String) {

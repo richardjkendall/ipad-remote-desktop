@@ -15,10 +15,9 @@ struct GuacViewer: UIViewRepresentable {
     let hostName: String
     let serverName: String
     let configObject: ConfigModel
-    
     var closeProgressBox: () -> Void
-        
-    init(host: String, server: String, config: ConfigModel, closeProgressBoxCallback: @escaping () -> Void) {
+            
+    init(host: String, server: String, config: ConfigModel, closeProgressBoxCallback: @escaping () -> Void, handleStateUpdate: @escaping (String) -> Void) {
         Logger.guacViewer.info("Loading webview for remote host \(host)")
         
         hostName = host
@@ -41,6 +40,7 @@ struct GuacViewer: UIViewRepresentable {
         let messageHandler = MessageHandler() {
             (state) -> () in
                 print("got state from messageHandler \(state)")
+                handleStateUpdate(state)
                 if state == "S3" {
                     closeProgressBoxCallback()
                 }
@@ -62,25 +62,20 @@ struct GuacViewer: UIViewRepresentable {
     
     func makeUIView(context: Context) -> WKWebView {
         webView.allowsBackForwardNavigationGestures = false
-        return webView
-    }
-    
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        Logger.guacViewer.info("First appearance for host \(hostName)")
+        
         if let url = Bundle.main.url(forResource: "viewer", withExtension: "html") {
             Logger.guacViewer.info("Loading HTML file \(url)")
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
             Logger.guacViewer.warning("HTML file not found")
         }
+        
+        return webView
     }
     
-    /*func handleConnStateChange(state: String) {
-        print("in handle conn state change: \(state)")
-        if state == "S3" {
-            closeProgressBox()
-        }
-    }*/
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+
+    }
     
     class MessageHandler: NSObject, WKScriptMessageHandler {
         var handleStateChange: (String) -> Void

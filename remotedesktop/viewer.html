@@ -13,6 +13,12 @@
                 height: 100vh;
                 box-sizing: border-box;
             }
+            
+            @media (prefers-color-scheme: dark) {
+                body {
+                    background: #000000;
+                }
+            }
         </style>
         <script type="text/javascript" src="all.min.js"></script>
         <script>
@@ -28,6 +34,7 @@
             let global_lcl_disp_h = 0;
             
             let guac = {};
+            let tunnel = {};
             
             //window.webkit.messageHandlers.console.postMessage("starting for = " + app_host_name);
             
@@ -83,9 +90,15 @@
                 var display = document.getElementById("display");
                 //window.webkit.messageHandlers.console.postMessage(app_host_name + ": got display");
                 
-                // Instantiate client, using an HTTP tunnel for communications.
+                // Instantiate client, using a WebSocket tunnel for communications.
+                tunnel = new Guacamole.WebSocketTunnel("wss://" + app_server_name + "/" + app_path + "/websocket-tunnel/" + app_host_name);
+                
+                tunnel.onerror = function(status) {
+                    log_to_app("Tunnel error: " + status.code + " - " + status.message);
+                };
+                
                 guac = new Guacamole.Client(
-                    new Guacamole.WebSocketTunnel("wss://" + app_server_name + "/" + app_path + "/websocket-tunnel/" + app_host_name)
+                    tunnel
                 );
                 //window.webkit.messageHandlers.console.postMessage(app_host_name + ": created client");
                 
@@ -105,9 +118,14 @@
                 // Error handler
                 guac.onerror = function(error) {
                     //window.webkit.messageHandlers.console.postMessage(error);
-                    console.log(error);
+                    //console.log(error);
+                    log_to_app("Error from guac: " + error);
                 };
                 //window.webkit.messageHandlers.console.postMessage(app_host_name + ": added error function");
+                
+                guac.onsync = function(ts) {
+                    log_to_app("Sync, ts: " + ts);
+                };
                 
                 // Connect
                 guac.connect();

@@ -13,12 +13,13 @@ struct GuacViewerWrapper: View {
     var host: String
     var server: String
     var config: ConfigModel
+    var handleStateChange: ((String) -> Void)
     
     @State var showLoadingBox = false
     
     var body: some View {
         ZStack {
-            GuacViewer(host: host, server: server, config: config, closeProgressBoxCallback: CloseProgressView)
+            GuacViewer(host: host, server: server, config: config, closeProgressBoxCallback: CloseProgressView, handleStateUpdate: HandleStateUpdate)
             .onAppear {
                 print("wrapper onappear")
                 Logger.guacViewerWrapper.info("Onappear for guac view wrapper")
@@ -29,6 +30,11 @@ struct GuacViewerWrapper: View {
                 })
             }
         }
+    }
+    
+    func HandleStateUpdate(_ state: String) {
+        //connectionState = state
+        handleStateChange(state)
     }
     
     func CloseProgressView() {

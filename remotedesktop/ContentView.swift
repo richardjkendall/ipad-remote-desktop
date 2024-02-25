@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var remoteServerHostName = ""
     @State private var showErrorAlert = false
     @State private var selectedHost: String? = ""
+    @State private var connectionState = "Idle"
 
     init() {
         Logger.mainView.info("Init for view")
@@ -45,19 +46,42 @@ struct ContentView: View {
                         Label("Settings", systemImage: "gear")
                     }
                 }
-                ToolbarItem {
-                    Button(action: closeHost) {
-                        Label("Close", systemImage: "xmark")
-                    }
-                    .disabled(selectedHost!.isEmpty)
-                }
             }
         } detail: {
             if !selectedHost!.isEmpty {
                 // get host
                 if let item = try? configModel.getHostByName(h: selectedHost!) {
-                    GuacViewerWrapper(host: item.hostName, server: remoteServerHostName, config: configModel)
+                    VStack {
+                        GuacViewerWrapper(
+                            host: item.hostName,
+                            server: remoteServerHostName,
+                            config: configModel,
+                            handleStateChange: updateConnectionState
+                        )
                         .id(item.hostName + item.host + item.port)
+                    }
+                    .toolbar {
+                        ToolbarItem {
+                            Button(action: closeHost) {
+                                Label("Close", systemImage: "xmark")
+                            }
+                            .disabled(selectedHost!.isEmpty)
+                        }
+                        ToolbarItem {
+                            Button(action: closeHost) {
+                                Label("Reconnect", systemImage: "network.slash")
+                            }
+                            .disabled(true)
+                        }
+                        ToolbarItem {
+                            Text("\(connectionState)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.blue)
+                                .padding([.all], 3)
+                                .background(RoundedRectangle(cornerRadius: 4).stroke().foregroundColor(.blue))
+                        }
+                        
+                    }
                 } else {
                     Text("Error")
                 }
@@ -69,7 +93,8 @@ struct ContentView: View {
                     Text("Select a host to connect")
                 }
             }
-        }        
+        }
+        
         .sheet(isPresented: $showLoginPopup, onDismiss: {
             Logger.mainView.info("Login sheet has been dismissed")
             //print("login sheet dismissed")
@@ -146,6 +171,22 @@ struct ContentView: View {
             } else {
                 showSettingsPopup = true
             }
+        }
+    }
+    
+    private func updateConnectionState(_ state: String) {
+        print("state change \(state)")
+        switch state {
+        case "S1":
+            connectionState = "Connecting..."
+        case "S2":
+            connectionState = "Waiting..."
+        case "S3":
+            connectionState = "Connected"
+        case "S4", "S5":
+            connectionState = "Disconnected"
+        default:
+            connectionState = "Idle"
         }
     }
     
